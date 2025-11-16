@@ -1,0 +1,120 @@
+/*I found this site https://www.youtube.com/watch?v=JghpLbCtnUU to 
+help with the program and since I used most of the author's code 
+I felt obliged to give credit where credit is due.  I have modified 
+his original code to add a few extra lights and I had to divide by a
+different number, so I have added to the original code to suit my 
+purposes.*/
+
+//setting all of the pins
+
+int potPin = A0;
+int ledPin = 2;
+int ledPin2 = 3;
+int ledPin3 = 4;
+int ledPin4 = 5;
+int ledPin5 = 6;
+int ledPin6 = 7;
+int ledPin7 = 8;
+
+
+//setting the pins to input or output
+void setup() {
+  // put your setup code here, to run once:
+	pinMode(potPin, INPUT);
+	pinMode(ledPin, OUTPUT);
+	pinMode(ledPin2, OUTPUT);
+	pinMode(ledPin3, OUTPUT);
+	pinMode(ledPin4, OUTPUT);
+ 	pinMode(ledPin5, OUTPUT);
+  	pinMode(ledPin6, OUTPUT);
+  	pinMode(ledPin7, OUTPUT);
+  
+Serial.begin(9600);//turn on the serial monitor
+}
+//I have gone the long way around for now to make each LED  
+//light up when the potentiometer is reading a certain voltage
+void loop() {
+  
+int potMeasure = analogRead(A0);
+Serial.println(potMeasure);//send the data to the serial monitor
+  //When the potentiometer is less than 1 then no LEDs are on
+ if (potMeasure < 1){
+  digitalWrite(ledPin, LOW);
+  digitalWrite(ledPin2, LOW);
+  digitalWrite(ledPin3, LOW);
+  digitalWrite(ledPin4, LOW);
+  digitalWrite(ledPin5, LOW);
+  digitalWrite(ledPin6, LOW);
+  digitalWrite(ledPin7, LOW);
+} 
+  //When the potentiometer reads less than 146 volts one light turns on
+else if (potMeasure < 146){
+  digitalWrite(ledPin, HIGH);
+  digitalWrite(ledPin2, LOW);
+  digitalWrite(ledPin3, LOW);
+  digitalWrite(ledPin4, LOW);
+  digitalWrite(ledPin5, LOW);
+  digitalWrite(ledPin6, LOW);
+  digitalWrite(ledPin7, LOW);
+}
+  //When the potentiometer reads less than 292 volts two lights turns on
+else if (potMeasure < 292){
+  digitalWrite(ledPin, HIGH);
+  digitalWrite(ledPin2, HIGH);
+  digitalWrite(ledPin3, LOW);
+  digitalWrite(ledPin4, LOW);
+  digitalWrite(ledPin5, LOW);
+  digitalWrite(ledPin6, LOW);
+  digitalWrite(ledPin7, LOW);
+}
+  //When the potentiometer reads less than under 438 volts three lights turns on
+else if (potMeasure < 438){
+  digitalWrite(ledPin, HIGH);
+  digitalWrite(ledPin2, HIGH);
+  digitalWrite(ledPin3, HIGH);
+  digitalWrite(ledPin4, LOW);
+  digitalWrite(ledPin5, LOW);
+  digitalWrite(ledPin6, LOW);
+  digitalWrite(ledPin7, LOW);
+}
+  //When the potentiometer reads less than 584 volts four lights turns on
+else if (potMeasure < 584){
+  digitalWrite(ledPin, HIGH);
+  digitalWrite(ledPin2, HIGH);
+  digitalWrite(ledPin3, HIGH);
+  digitalWrite(ledPin4, HIGH);
+  digitalWrite(ledPin5, LOW);
+  digitalWrite(ledPin6, LOW);
+  digitalWrite(ledPin7, LOW);
+}
+  //When the potentiometer reads less than 730 volts five lights turns on
+  else if (potMeasure < 730){
+  digitalWrite(ledPin, HIGH);
+  digitalWrite(ledPin2, HIGH);
+  digitalWrite(ledPin3, HIGH);
+  digitalWrite(ledPin4, HIGH);
+  digitalWrite(ledPin5, HIGH);
+  digitalWrite(ledPin6, LOW);
+  digitalWrite(ledPin7, LOW);
+}
+  //When the potentiometer reads less than 876 volts six lights turns on
+  else if (potMeasure < 876){
+  digitalWrite(ledPin, HIGH);
+  digitalWrite(ledPin2, HIGH);
+  digitalWrite(ledPin3, HIGH);
+  digitalWrite(ledPin4, HIGH);
+  digitalWrite(ledPin5, HIGH);
+  digitalWrite(ledPin6, HIGH);
+  digitalWrite(ledPin7, LOW);
+}
+  //When the potentiometer reads less than 1024 volts all lights turns on
+  else if (potMeasure < 1024){
+  digitalWrite(ledPin, HIGH);
+  digitalWrite(ledPin2, HIGH);
+  digitalWrite(ledPin3, HIGH);
+  digitalWrite(ledPin4, HIGH);
+  digitalWrite(ledPin5, HIGH);
+  digitalWrite(ledPin6, HIGH);
+  digitalWrite(ledPin7, HIGH);
+}
+}
