@@ -1,0 +1,153 @@
+#include <Wire.h>
+#include <Servo.h>
+#include <LiquidCrystal_I2C.h>
+
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+Servo servo1; //Yaw  (Pivot)
+Servo servo2; //Roll (Steer wheel)
+Servo servo3; //Pitch(Gas)
+Servo servo4; //Throttle (elevation)
+
+const int potPin1 = A0; // Yaw pot
+const int potPin2 = A1; // Steering wheel Pot (Roll)
+const int potPin3 = A2; // Pedal Pot (Pitch)
+const int potPin4 = A3; // Brake Pot (Pitch)
+const int switchPin1 = 2; //
+const int switchPin2 = 3; //
+
+const int dipSwitchPin = 4; // Arm switch.  Changing armSwitchPin to dipSwitchPin
+//for the purpose of using TinkerCad. I cound not find an arm switch in TinkerCad.
+
+int potValue1, potValue2, potValue3, potValue4;
+int switchState1 = 0, switchState2 = 0, dipSwitchState = 0;//armSwitchPin to dipSwitchPin
+int servo4Pos = 90;
+bool isArmed = false;
+
+const int neutralValuePedal = 963; // Neutral position of the pedal potentiometer
+const int neutralValueBrake = 996; // Neutral position of the brake potentiometer
+
+void setup() {
+  Serial.begin(9600);
+  while (!Serial) {
+    ;
+  }
+  Serial.println("Serial 0 OK");
+
+  lcd.begin(16, 2);//This should turn the LCD on.
+  lcd.print("Hello Arduino!");//This should print out on the LCD
+  
+  lcd.init();
+  lcd.backlight();
+  lcd.setCursor(0, 0);
+  lcd.print("Pedal:");
+  lcd.setCursor(0, 1);
+  lcd.print("Brake: ");
+  lcd.setCursor(8, 0);
+  lcd.print("StWl:");
+  
+  servo1.attach(9);  // Yaw servo
+  servo2.attach(10); // Roll servo
+  servo3.attach(11); // Pitch Servo
+  servo4.attach(6);  // Throttle Servo
+
+  pinMode(dipSwitchPin, INPUT_PULLUP); // Use internal pull-up resistor
+}//armSwitchPin to dipSwitchPin
+
+void loop() {
+  potValue1 = analogRead(potPin1); // Yaw
+  potValue2 = analogRead(potPin2); // Steering
+  potValue3 = analogRead(potPin3); // Pedal
+  potValue4 = analogRead(potPin4); // Brake
+
+  Serial.print("Brake: ");
+  Serial.print(potValue4);
+  Serial.print("\tPedal: ");
+  Serial.print(potValue3);
+  Serial.print("\tSteering: ");
+  Serial.print(potValue2);
+  Serial.print("\tYaw: ");
+  Serial.println(potValue1);
+  
+  delay(500);
+  
+  
+ /* lcd.setCursor(4, 0);
+  lcd.print(potValue3); //Pedal value
+  lcd.setCursor(6, 1);  
+  lcd.print(potValue4); //Brake value
+  lcd.setCursor(14, 0);
+  lcd.print(potValue2); //Steering value
+*/
+  dipSwitchState = digitalRead(dipSwitchPin);//armSwitchPin to dipSwitchPin
+
+  if (dipSwitchState == LOW && !isArmed) { // Check if arm switch is toggled
+    //armSwitchPin to dipSwitchPin
+    armServos();
+    delay(3000); // Wait for 3 seconds
+    resetServosToPot(); // Reset servos to position based on potentiometers
+    isArmed = true;
+  } else if (dipSwitchState == HIGH && isArmed) {
+    //armSwitchPin to dipSwitchPin
+    disarmSequence();
+    isArmed = false;
+  }
+
+  if (!isArmed) {
+    controlServos();
+  }
+}
+
+void armServos() {
+  servo1.write(130); // yaw   130
+  servo2.write(50);  // roll or 50, adjust as needed
+  servo3.write(130); // pitch or 130, adjust as needed
+  servo4.write(50);  // Elevation or 50, adjust as needed
+}
+
+void resetServosToPot() {
+  int servoPos1 = map(potValue1, 0, 1023, 50, 130);
+  int servoPos2 = map(potValue2, 0, 1023, 50, 130);
+  servo1.write(servoPos1);
+  servo2.write(servoPos2);
+  servo3.write(80);
+  servo4.write(80);
+}
+
+void disarmSequence() {
+  servo4.write(40); // or 50, adjust as needed
+  delay(5000); // Wait for 5 seconds
+  servo4.write(80); // Return to middle position
+}
+
+void controlServos() {
+  int servoPos1 = map(potValue1, 0, 1023, 50, 130);
+  int servoPos2 = map(potValue2, 0, 1023, 50, 130);
+  servo1.write(servoPos1);
+  servo2.write(servoPos2);
+  int i= determinePitchServoPosition(potValue3, potValue4);
+  if (i > 0){
+    Serial.print("Servo3: ");       
+    Serial.println(i);
+    servo3.write(i);
+  }
+  servo4.write(90);
+}
+
+int determinePitchServoPosition(int pedalValue, int brakeValue) {
+  int deviationPedal = abs(pedalValue - neutralValuePedal);
+  int deviationBrake = abs(brakeValue - neutralValueBrake);
+  
+ Serial.print("pedal deviation: ");
+  Serial.println(deviationPedal);
+  Serial.print("brake deviation: ");
+  Serial.println(deviationBrake);
+  
+  if (deviationPedal < 12 && deviationBrake < 12)
+    return 0;
+  if (deviationPedal > deviationBrake) {
+    return map(pedalValue, 150, 957, 30, 80); // Map range for pedal
+  } else {
+    return map(brakeValue, 126, 991, 150, 80); // Map range for brake
+  }
+}
